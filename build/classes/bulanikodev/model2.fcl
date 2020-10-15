@@ -1,0 +1,51 @@
+
+FUNCTION_BLOCK model2
+
+VAR_INPUT
+    pa500 : REAL;
+    DA : REAL;
+    
+END_VAR
+
+VAR_OUTPUT
+
+     tumor_tipi: REAL;
+
+
+END_VAR
+//Bulanıklaştırma
+
+FUZZIFY PA500
+    TERM dusuk:= (0,0)(0.1874,1);
+    TERM yuksek:= (0,0)(0.1874,1)(0.3583,1)(0.5000,0);
+    
+END_FUZZIFY
+
+FUZZIFY DA
+    TERM uyumsuz:=(0,0)(120.9015,1);
+    TERM uyumlu :=(0,0)(120.9015,1)(264.8049,1)(1000,0);
+
+END_FUZZIFY
+DEFUZZIFY tumor_tipi
+    TERM  kanser :=(0,0)(1,1); 
+    TERM  kanser_degil :=(0,1)(1,0);
+
+    METHOD : COG;
+    DEFAULT := 90;
+END_DEFUZZIFY
+
+//mamdani
+
+RULEBLOCK kuralblock
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+    
+    RULE 1 :IF PA500 IS dusuk OR DA IS uyumsuz THEN tumor_tipi IS kanser_degil;
+    RULE 2 :IF PA500 IS dusuk OR DA IS uyumlu THEN tumor_tipi IS kanser;
+    RULE 3 :IF PA500 IS yuksek OR DA IS uyumsuz THEN tumor_tipi IS kanser;
+    RULE 4 :IF PA500 IS yuksek OR DA IS uygun THEN tumor_tipi IS kanser;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
